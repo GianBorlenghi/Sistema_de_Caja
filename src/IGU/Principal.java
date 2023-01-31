@@ -10,6 +10,7 @@ import Modelos.Producto;
 import Servicios.ServicioProducto;
 import Servicios.ServicioVenta;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ public class Principal extends javax.swing.JFrame {
     ArrayList<Producto> listaProd = new ArrayList<>();
     ServicioProducto servP = new ServicioProducto();
     ServicioVenta serV = new ServicioVenta();
+    DecimalFormat formatoDecimal = new DecimalFormat("#.00");
 
     float total = 0;
 
@@ -480,7 +482,7 @@ public class Principal extends javax.swing.JFrame {
         int fila = tablaCompra.getSelectedRow();
 
         if (key == 127 && compra.size() > 0) {
-            //servM.bajaMarca(Integer.parseInt(id));
+
             DefaultTableModel model = (DefaultTableModel) tablaCompra.getModel();
             String precio = String.valueOf(tablaCompra.getValueAt(fila, 1));
             String cant = String.valueOf(tablaCompra.getValueAt(fila, 2));
@@ -488,7 +490,8 @@ public class Principal extends javax.swing.JFrame {
             model.removeRow(fila);
             compra.remove(fila);
             this.total = this.total - (Float.parseFloat(precio) * Integer.parseInt(cant));
-            txtTotal.setText("$ " + this.total);
+            String p = formatoDecimal.format(this.total);
+            txtTotal.setText("$ " + p);
 
         }
 
@@ -510,7 +513,7 @@ public class Principal extends javax.swing.JFrame {
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(this, ex.toString());
                 }
-                                
+
             }
         } catch (ParseException ex) {
             Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
@@ -541,8 +544,10 @@ public class Principal extends javax.swing.JFrame {
                     objec[1] = prod.getPrecio();
                     objec[2] = cant;
                     model.addRow(objec);
+                    formatoDecimal.format(prod.getPrecio());
                     this.total += prod.getPrecio() * cant;
-                    txtTotal.setText("$ " + this.total);
+                    String p = formatoDecimal.format(this.total);
+                    txtTotal.setText("$ " + p);
                     txtCantidad.setValue(1);
                     break;
                 } else {
@@ -550,8 +555,10 @@ public class Principal extends javax.swing.JFrame {
                     int q = (int) model.getValueAt(compra.indexOf(prod), 2);
                     q += cant;
                     prod.setCant(q);
+                    formatoDecimal.format(prod.getPrecio());
                     this.total += prod.getPrecio() * cant;
-                    txtTotal.setText("$ " + this.total);
+                    String p = formatoDecimal.format(this.total);
+                    txtTotal.setText("$ " + p);
                     txtCantidad.setValue(1);
                     model.setValueAt(q, compra.indexOf(prod), 2);
 

@@ -7,10 +7,12 @@ package IGU;
 
 import Modelos.Venta;
 import Servicios.ServicioVenta;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -26,6 +28,7 @@ public class VistaCierre extends javax.swing.JFrame {
         setTitle("DETALLE OPERACIONES DEL DIA");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         llenarTablaVenta();
+
     }
 
     
@@ -35,16 +38,20 @@ public class VistaCierre extends javax.swing.JFrame {
         listaVentas = servV.listarVentas();
         Object[] venta = new Object[4];
         DefaultTableModel model = (DefaultTableModel) tablaVentas.getModel();
+        model.setRowCount(0);
+        DecimalFormat formatoDecimal = new DecimalFormat("#.00");
         for(Venta v : listaVentas){
+            
             venta[0] = v.getId_venta();
             venta[1] = v.getFecha();
-            venta[2] = v.getTotal();
+            venta[2] = "$ "+formatoDecimal.format(v.getTotal());
             venta[3] = v.getMetodo_pago();
             
             model.addRow(venta);
         }
         
         tablaVentas.setModel(model);
+        JOptionPane.showMessageDialog(this, "TOTAL VENTA DEL DIA: $ "+formatoDecimal.format(servV.cerrarCaja()));
                 
     }
 
