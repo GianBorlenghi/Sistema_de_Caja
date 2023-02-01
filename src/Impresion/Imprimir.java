@@ -30,10 +30,13 @@ import java.util.ArrayList;
 
 public class Imprimir {
 
-    public void imprimimos(ArrayList<Producto> listaCompra, float total, int ticket) throws IOException {
+    private String ruta = "Users\\giaan\\OneDrive\\Documentos\\Escritorio\\pepe\\";
+    
+    public void imprimimos(ArrayList<Producto> listaCompra, float total, int ticket,String descuento) throws IOException {
         Document documento = new Document();
         try {
-            PdfWriter writer = PdfWriter.getInstance(documento, new FileOutputStream("Ticket.pdf"));
+            PdfWriter writer = PdfWriter.getInstance(documento, new FileOutputStream("C:\\"+ruta+"Ticket.pdf"));
+            
             documento.open();
             PdfContentByte cb = writer.getDirectContent();
             Graphics g = cb.createGraphics(PageSize.LETTER.getWidth(), PageSize.LETTER.getHeight());
@@ -105,6 +108,11 @@ public class Imprimir {
 
             }
 
+            PdfPCell celdaDescuento = new PdfPCell(new Paragraph(descuento));
+            celdaDescuento.setColspan(3);
+            table.addCell(celdaDescuento);
+            
+            
             PdfPCell celdaFinal = new PdfPCell(new Paragraph("TOTAL                                                                                  $" + total));
             celdaFinal.setBorderColor(Color.RED);
             celdaFinal.setColspan(3);
@@ -115,25 +123,28 @@ public class Imprimir {
 
             documento.add(table);
 
+            documento.close();
+            writer.close();
+            
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());
         } catch (DocumentException e) {
             System.out.println(e.toString());
         }
-        documento.close();
-
-        File file = new File("Ticket.pdf");
         
-         Desktop.getDesktop().open(file);
-        // file.deleteOnExit();
+        File file = new File("C:\\"+ruta+"Ticket.pdf");
+        
+        Desktop.getDesktop().open(file);
+        //Desktop.getDesktop().print(file);
+        // file.deleteOnExit();*/
 
     }
 
     public void imprimirCierreCaja(float totalDelDia) throws IOException {
         Document documento = new Document();
         try {
-            
-            PdfWriter writer = PdfWriter.getInstance(documento, new FileOutputStream("Cierre.pdf"));
+
+            PdfWriter writer = PdfWriter.getInstance(documento, new FileOutputStream("C:\\"+ruta+"Cierre.pdf"));
             documento.open();
             PdfContentByte cb = writer.getDirectContent();
             Graphics g = cb.createGraphics(PageSize.LETTER.getWidth(), PageSize.LETTER.getHeight());
@@ -195,6 +206,13 @@ public class Imprimir {
             table.addCell("" + totalDelDia);
 
             documento.add(table);
+            
+        documento.close();   
+        
+        
+        File file = new File("C:\\"+ruta+"Cierre.pdf");
+
+        Desktop.getDesktop().open(file);
 
         } catch (FileNotFoundException e) {
             System.out.println(e.toString());
@@ -202,13 +220,7 @@ public class Imprimir {
             System.out.println(e.toString());
         }
         documento.close();
-        
-        
-        
- 
-        
-        
-       
+
     }
 
 }/*
@@ -233,4 +245,4 @@ public class Imprimir {
             fw.close();
             flujoSalida.close();
             flujoEntrada.close();
-*/
+ */

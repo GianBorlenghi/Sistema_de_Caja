@@ -35,11 +35,12 @@ public class Principal extends javax.swing.JFrame {
     DecimalFormat formatoDecimal = new DecimalFormat("#.00");
 
     float total = 0;
-
+    String descuento = "";
     public Principal() {
         initComponents();
         llenarComboProducto();
         setTitle("Principal");
+        menuJubilado.setEnabled(false);
         btnBorrarCompra.setEnabled(false);
         btnImprimir.setEnabled(false);
         comboPago.addItem("METODO DE PAGO");
@@ -90,6 +91,8 @@ public class Principal extends javax.swing.JFrame {
         jMenuItem3 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         cerrarCajaMenu = new javax.swing.JMenuItem();
+        menuDescuento = new javax.swing.JMenu();
+        menuJubilado = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -388,6 +391,21 @@ public class Principal extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu2);
 
+        menuDescuento.setBackground(new java.awt.Color(204, 204, 204));
+        menuDescuento.setForeground(new java.awt.Color(0, 0, 0));
+        menuDescuento.setText("Descuentos");
+
+        menuJubilado.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
+        menuJubilado.setText("Jubilados");
+        menuJubilado.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuJubiladoActionPerformed(evt);
+            }
+        });
+        menuDescuento.add(menuJubilado);
+
+        jMenuBar1.add(menuDescuento);
+
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -434,11 +452,13 @@ public class Principal extends javax.swing.JFrame {
             try {
                 int nTicker = serV.guardarVenta(compra, this.total, pago);
                 Imprimir im = new Imprimir();
-                im.imprimimos(compra, this.total, nTicker);
+                im.imprimimos(compra, this.total, nTicker,descuento);
                 btnImprimir.setEnabled(false);
                 tablaCompra.setEnabled(false);
                 comboPago.setEnabled(false);
                 this.total = 0;
+                menuJubilado.setEnabled(false);
+
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, ex.toString());
             }
@@ -468,6 +488,8 @@ public class Principal extends javax.swing.JFrame {
                 btnImprimir.setEnabled(false);
                 tablaCompra.setEnabled(true);
                 comboPago.setEnabled(true);
+                menuJubilado.setEnabled(false);
+
 
             }
         } else {
@@ -539,6 +561,7 @@ public class Principal extends javax.swing.JFrame {
 
                 if (!compra.contains(prod)) {
                     prod.setCant(cant);
+                   
                     compra.add(prod);
                     objec[0] = prod.getNombre_producto();
                     objec[1] = prod.getPrecio();
@@ -549,6 +572,7 @@ public class Principal extends javax.swing.JFrame {
                     String p = formatoDecimal.format(this.total);
                     txtTotal.setText("$ " + p);
                     txtCantidad.setValue(1);
+                    
                     break;
                 } else {
 
@@ -568,6 +592,8 @@ public class Principal extends javax.swing.JFrame {
 
         btnBorrarCompra.setEnabled(true);
         btnImprimir.setEnabled(true);
+        menuJubilado.setEnabled(true);
+
     }//GEN-LAST:event_btnAgregarActionPerformed
 
     private void txtCantidadKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCantidadKeyTyped
@@ -585,6 +611,22 @@ public class Principal extends javax.swing.JFrame {
         Producto p = listaProd.get(i);
         txtMarca.setText(p.getMarca_nombre());
     }//GEN-LAST:event_comboProductoItemStateChanged
+
+    private void menuJubiladoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuJubiladoActionPerformed
+
+        if(this.total > 0){
+            this.total = (float) (this.total - (this.total *0.1));
+            String p = formatoDecimal.format(this.total);
+            txtTotal.setText("$ " + p);
+            DefaultTableModel model = (DefaultTableModel) tablaCompra.getModel();
+            Object[] o = new Object[1];
+            o[0] = "Jubilado -10%";
+            model.addRow(o);
+            menuJubilado.setEnabled(false);
+            this.descuento = "Jubilado -10%";
+        }
+
+    }//GEN-LAST:event_menuJubiladoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -640,6 +682,8 @@ public class Principal extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JMenu menuDescuento;
+    private javax.swing.JMenuItem menuJubilado;
     private javax.swing.JPanel panelPrint;
     private javax.swing.JPanel printPanel;
     private javax.swing.JTable tablaCompra;

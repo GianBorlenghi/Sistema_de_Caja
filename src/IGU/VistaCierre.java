@@ -5,8 +5,11 @@
  */
 package IGU;
 
+import Modelos.Producto;
 import Modelos.Venta;
 import Servicios.ServicioVenta;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,36 +26,52 @@ public class VistaCierre extends javax.swing.JFrame {
 
     ServicioVenta servV = new ServicioVenta();
     ArrayList<Venta> listaVentas = new ArrayList<>();
+    ArrayList<Producto> listaP = new ArrayList<>();
     public VistaCierre() throws ParseException {
         initComponents();
         setTitle("DETALLE OPERACIONES DEL DIA");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         llenarTablaVenta();
+        tablaVentas.addMouseListener(
+                new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getClickCount() == 2)
+                {
+                    int fila = tablaVentas.getSelectedRow();                            
+                    int columna = 0;
+                    int id = (int) tablaVentas.getValueAt(fila, columna);
+                    listaP = servV.detalleVenta(id);
+                    DetalleVentaXDia dvxd = new DetalleVentaXDia(listaP);
+                    dvxd.setVisible(true);
+                    dvxd.setLocationRelativeTo(null);
+
+                }
+            }
+        }
+        );
 
     }
 
-    
-    
-    public void llenarTablaVenta() throws ParseException{
-            
+    public void llenarTablaVenta() throws ParseException {
+
         listaVentas = servV.listarVentas();
         Object[] venta = new Object[4];
         DefaultTableModel model = (DefaultTableModel) tablaVentas.getModel();
         model.setRowCount(0);
         DecimalFormat formatoDecimal = new DecimalFormat("#.00");
-        for(Venta v : listaVentas){
-            
+        for (Venta v : listaVentas) {
+
             venta[0] = v.getId_venta();
             venta[1] = v.getFecha();
-            venta[2] = "$ "+formatoDecimal.format(v.getTotal());
+            venta[2] = "$ " + formatoDecimal.format(v.getTotal());
             venta[3] = v.getMetodo_pago();
-            
+
             model.addRow(venta);
         }
-        
+
         tablaVentas.setModel(model);
-        JOptionPane.showMessageDialog(this, "TOTAL VENTA DEL DIA: $ "+formatoDecimal.format(servV.cerrarCaja()));
-                
+        JOptionPane.showMessageDialog(this, "TOTAL VENTA DEL DIA: $ " + formatoDecimal.format(servV.cerrarCaja()));
+
     }
 
     /**
