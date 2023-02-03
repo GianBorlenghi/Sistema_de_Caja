@@ -5,9 +5,12 @@ import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
+import com.lowagie.text.Font;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
+import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfDocument;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -15,7 +18,10 @@ import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Graphics;
 import java.awt.print.Pageable;
+import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -27,38 +33,67 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.printing.PDFPageable;
 
 public class Imprimir {
 
-    private String ruta = "Users\\giaan\\OneDrive\\Documentos\\Escritorio\\pepe\\";
-    
-    public void imprimimos(ArrayList<Producto> listaCompra, float total, int ticket,String descuento) throws IOException {
-        Document documento = new Document();
+    public ByteArrayOutputStream crearTicketVenta(ArrayList<Producto> listaCompra, float total, int ticket, String descuento, String pago) throws IOException {
+        ByteArrayOutputStream docBytes = new ByteArrayOutputStream();
+
         try {
-            PdfWriter writer = PdfWriter.getInstance(documento, new FileOutputStream("C:\\"+ruta+"Ticket.pdf"));
-            
+            Rectangle pageSize = new Rectangle(360f, 14400f);
+            Document documento = new Document(pageSize);
+
+            Font fuente = new Font();
+            fuente.setSize(8);
+            fuente.setStyle(Font.NORMAL);
+            PdfWriter pdfWriter = PdfWriter.getInstance(documento, docBytes);
+            PdfDocument pdfDoc = new PdfDocument();
+            pdfDoc.addWriter(pdfWriter);
+
             documento.open();
-            PdfContentByte cb = writer.getDirectContent();
-            Graphics g = cb.createGraphics(PageSize.LETTER.getWidth(), PageSize.LETTER.getHeight());
 
             Paragraph titulo = new Paragraph();
-            titulo.add("TICKET GOOD MARKET");
+            titulo.getFont().setStyle(Font.BOLD);
+            titulo.getFont().setSize(10);
+            titulo.add("*GOOD MARKET*");
             titulo.setAlignment(Element.ALIGN_CENTER);
 
-            Paragraph nticket = new Paragraph();
-            nticket.add("N° TICKET: " + ticket);
-            nticket.setAlignment(Element.ALIGN_CENTER);
+            Paragraph srl = new Paragraph();
+            srl.getFont().setStyle(Font.NORMAL);
+            srl.getFont().setSize(8);
+            srl.add("GOOD MARKET S.R.L");
+            srl.setAlignment(Element.ALIGN_CENTER);
+
+            Paragraph cuil = new Paragraph();
+            cuil.getFont().setStyle(Font.NORMAL);
+            cuil.getFont().setSize(8);
+            cuil.add("CUIL: 23-95438568-1");
+            cuil.setAlignment(Element.ALIGN_CENTER);
 
             Paragraph direccion = new Paragraph();
-            direccion.add("AV. DE LOS TRABAJADORES 1875");
+            direccion.getFont().setStyle(Font.NORMAL);
+            direccion.getFont().setSize(8);
+            direccion.add("DIRECCION: AV. DE LOS TRABAJADORES 1875");
             direccion.setAlignment(Element.ALIGN_CENTER);
+
+            Paragraph telefono = new Paragraph();
+            telefono.getFont().setStyle(Font.BOLD);
+            telefono.getFont().setSize(10);
+            telefono.add("TELEFONO: 2477-368798");
+            telefono.setAlignment(Element.ALIGN_CENTER);
 
             Paragraph sep = new Paragraph();
-            direccion.add("***********************************************************************");
-            direccion.setAlignment(Element.ALIGN_CENTER);
+            sep.getFont().setStyle(Font.NORMAL);
+            sep.getFont().setSize(8);
+            sep.add("***********************************************************************");
+            sep.setAlignment(Element.ALIGN_CENTER);
 
             Paragraph hora = new Paragraph();
-
+            hora.setFont(fuente);
             int gmin;
             int ghora;
             int gdia;
@@ -71,49 +106,79 @@ public class Imprimir {
             ghora = LocalDateTime.now().getHour();
             gmin = LocalDateTime.now().getMinute();
 
-            hora.add("Fecha: " + gdia + "/" + gmes + "/" + gaño + " " + ghora + ":" + gmin);
+            hora.getFont().setStyle(Font.NORMAL);
+            hora.getFont().setSize(8);
+            hora.add("FECHA: " + gdia + "/" + gmes + "/" + gaño + " " + ghora + ":" + gmin);
             hora.setAlignment(Element.ALIGN_CENTER);
 
+            Paragraph nticket = new Paragraph();
+            nticket.getFont().setSize(8);
+            nticket.add("N° TICKET: " + ticket);
+            nticket.setAlignment(Element.ALIGN_CENTER);
+
             documento.add(titulo);
-            documento.add(Chunk.NEWLINE);
-
             documento.add(sep);
-            documento.add(Chunk.NEWLINE);
 
-            documento.add(nticket);
-            documento.add(Chunk.NEWLINE);
+            documento.add(srl);
+
+            documento.add(cuil);
 
             documento.add(direccion);
-            documento.add(Chunk.NEWLINE);
+
+            documento.add(telefono);
 
             documento.add(hora);
-            documento.add(Chunk.NEWLINE);
+
+            documento.add(nticket);
 
             documento.add(sep);
             documento.add(Chunk.NEWLINE);
 
             Paragraph titulos = new Paragraph();
-            titulos.add("ARTICULO                                       CANT.                         PRECIO UNITARIO\n");
+            titulos.getFont().setStyle(Font.NORMAL);
+            titulos.getFont().setSize(8);
+            titulos.add("ARTICULO                          CANT.                 PRECIO UNITARIO\n");
             titulos.setAlignment(Element.ALIGN_CENTER);
             documento.add(titulos);
             documento.add(Chunk.NEWLINE);
 
             PdfPTable table = new PdfPTable(3);
+            table.setTotalWidth(350f);
 
             for (Producto p : listaCompra) {
 
-                table.addCell("" + p.getNombre_producto());
-                table.addCell("" + p.getCant());
-                table.addCell("$" + p.getPrecio());
-
+                Paragraph col1 = new Paragraph("" + p.getNombre_producto() + " "+p.getMarca_nombre());
+                col1.getFont().setSize(8);
+                Paragraph col2 = new Paragraph("" + p.getCant());
+                col2.getFont().setSize(8);
+                Paragraph col3 = new Paragraph("$" + p.getPrecio());
+                col3.getFont().setSize(8);
+                table.addCell(col1);
+                table.addCell(col2);
+                table.addCell(col3);
             }
 
-            PdfPCell celdaDescuento = new PdfPCell(new Paragraph(descuento));
-            celdaDescuento.setColspan(3);
-            table.addCell(celdaDescuento);
-            
-            
-            PdfPCell celdaFinal = new PdfPCell(new Paragraph("TOTAL                                                                                  $" + total));
+            if (descuento != "") {
+                Paragraph p = new Paragraph(descuento);
+                p.getFont().setSize(8);
+                PdfPCell celdaDescuento = new PdfPCell(p);
+                celdaDescuento.setColspan(3);
+                celdaDescuento.setPaddingTop(5);
+                celdaDescuento.setPaddingBottom(5);
+                table.addCell(celdaDescuento);
+            }
+            Paragraph p2 = new Paragraph("Forma de pago: " + pago);
+            p2.getFont().setSize(8);
+            PdfPCell celdaMetodoPago = new PdfPCell(p2);
+            celdaMetodoPago.setBorder(0);
+            celdaMetodoPago.setColspan(3);
+            celdaMetodoPago.setPaddingTop(10);
+            celdaMetodoPago.setPaddingBottom(5);
+            table.addCell(celdaMetodoPago);
+
+            Paragraph pfinal = new Paragraph("TOTAL                                                     $" + total);
+            pfinal.getFont().setSize(8);
+            PdfPCell celdaFinal = new PdfPCell(pfinal);
             celdaFinal.setBorderColor(Color.RED);
             celdaFinal.setColspan(3);
             celdaFinal.setPaddingTop(5);
@@ -124,49 +189,80 @@ public class Imprimir {
             documento.add(table);
 
             documento.close();
-            writer.close();
-            
-        } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
+            pdfWriter.close();
+
         } catch (DocumentException e) {
             System.out.println(e.toString());
         }
-        
-        File file = new File("C:\\"+ruta+"Ticket.pdf");
-        
-        Desktop.getDesktop().open(file);
-        //Desktop.getDesktop().print(file);
-        // file.deleteOnExit();*/
+
+        return docBytes;
+    }
+
+    public void imprimir(ByteArrayOutputStream documentoBytes) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(documentoBytes.toByteArray());
+
+        PDDocument doc = PDDocument.load(bais);
+        PrinterJob job = PrinterJob.getPrinterJob();
+        if (job.printDialog() == true) {
+            job.setPageable(new PDFPageable(doc));
+            try {
+                job.print();
+            } catch (PrinterException ex) {
+                Logger.getLogger(Imprimir.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 
     }
 
-    public void imprimirCierreCaja(float totalDelDia) throws IOException {
-        Document documento = new Document();
+    public ByteArrayOutputStream imprimirCierreCaja(float totalDelDia) throws IOException {
+        ByteArrayOutputStream docBytes = new ByteArrayOutputStream();
         try {
 
-            PdfWriter writer = PdfWriter.getInstance(documento, new FileOutputStream("C:\\"+ruta+"Cierre.pdf"));
-            documento.open();
-            PdfContentByte cb = writer.getDirectContent();
-            Graphics g = cb.createGraphics(PageSize.LETTER.getWidth(), PageSize.LETTER.getHeight());
+            Rectangle pageSize = new Rectangle(360f, 14400f);
+            Document documento = new Document(pageSize);
+            PdfWriter pdfWriter = PdfWriter.getInstance(documento, docBytes);
+            PdfDocument pdfDoc = new PdfDocument();
+            pdfDoc.addWriter(pdfWriter);
 
-            Paragraph titulo = new Paragraph();
-            titulo.add("TICKET GOOD MARKET");
+            documento.open();
+
+           Paragraph titulo = new Paragraph();
+            titulo.getFont().setStyle(Font.BOLD);
+            titulo.getFont().setSize(10);
+            titulo.add("*CIERRE DE CAJA*");
             titulo.setAlignment(Element.ALIGN_CENTER);
 
-            Paragraph cierre = new Paragraph();
-            cierre.add("CIERRE DE CAJA");
-            cierre.setAlignment(Element.ALIGN_CENTER);
+            Paragraph srl = new Paragraph();
+            srl.getFont().setStyle(Font.NORMAL);
+            srl.getFont().setSize(8);
+            srl.add("GOOD MARKET S.R.L");
+            srl.setAlignment(Element.ALIGN_CENTER);
+
+            Paragraph cuil = new Paragraph();
+            cuil.getFont().setStyle(Font.NORMAL);
+            cuil.getFont().setSize(8);
+            cuil.add("CUIL: 23-95438568-1");
+            cuil.setAlignment(Element.ALIGN_CENTER);
 
             Paragraph direccion = new Paragraph();
-            direccion.add("AV. DE LOS TRABAJADORES 1875");
+            direccion.getFont().setStyle(Font.NORMAL);
+            direccion.getFont().setSize(8);
+            direccion.add("DIRECCION: AV. DE LOS TRABAJADORES 1875");
             direccion.setAlignment(Element.ALIGN_CENTER);
+
+            Paragraph telefono = new Paragraph();
+            telefono.getFont().setStyle(Font.BOLD);
+            telefono.getFont().setSize(10);
+            telefono.add("TELEFONO: 2477-368798");
+            telefono.setAlignment(Element.ALIGN_CENTER);
 
             Paragraph sep = new Paragraph();
-            direccion.add("***********************************************************************");
-            direccion.setAlignment(Element.ALIGN_CENTER);
+            sep.getFont().setStyle(Font.NORMAL);
+            sep.getFont().setSize(8);
+            sep.add("***********************************************************************");
+            sep.setAlignment(Element.ALIGN_CENTER);
 
             Paragraph hora = new Paragraph();
-
             int gmin;
             int ghora;
             int gdia;
@@ -179,70 +275,48 @@ public class Imprimir {
             ghora = LocalDateTime.now().getHour();
             gmin = LocalDateTime.now().getMinute();
 
-            hora.add("Fecha: " + gdia + "/" + gmes + "/" + gaño + " " + ghora + ":" + gmin);
+            hora.getFont().setStyle(Font.NORMAL);
+            hora.getFont().setSize(8);
+            hora.add("FECHA: " + gdia + "/" + gmes + "/" + gaño + " " + ghora + ":" + gmin);
             hora.setAlignment(Element.ALIGN_CENTER);
 
             documento.add(titulo);
-            documento.add(Chunk.NEWLINE);
 
             documento.add(sep);
-            documento.add(Chunk.NEWLINE);
 
-            documento.add(cierre);
-            documento.add(Chunk.NEWLINE);
+            documento.add(srl);
+            
+            documento.add(cuil);
+
 
             documento.add(direccion);
-            documento.add(Chunk.NEWLINE);
 
             documento.add(hora);
-            documento.add(Chunk.NEWLINE);
 
             documento.add(sep);
             documento.add(Chunk.NEWLINE);
 
             PdfPTable table = new PdfPTable(2);
 
-            table.addCell("TOTAL DEL DIA");
-            table.addCell("" + totalDelDia);
-
-            documento.add(table);
+            Paragraph col1 = new Paragraph("TOTAL DEL DIA");
+            col1.getFont().setSize(8);
+            table.addCell(col1);
             
-        documento.close();   
-        
-        
-        File file = new File("C:\\"+ruta+"Cierre.pdf");
+            Paragraph col2 = new Paragraph("$ " + totalDelDia);
+            col2.getFont().setSize(8);
+            col2.setAlignment(Element.ALIGN_RIGHT);
+            table.addCell(col2);
+            
+            documento.add(table);
 
-        Desktop.getDesktop().open(file);
+            documento.close();
+            pdfWriter.close();
 
-        } catch (FileNotFoundException e) {
-            System.out.println(e.toString());
         } catch (DocumentException e) {
             System.out.println(e.toString());
         }
-        documento.close();
 
+        return docBytes;
     }
 
-}/*
-
-//Creamos un flujo de entrada al cual asignamos el valor del PDF que esta dentro del JAR
-            InputStream flujoEntrada = this.getClass().getResourceAsStream("/docs/AGBase.pdf");
-            //Creamos un flujo de salida para poder escribir sobre el archivo temporal
-            FileOutputStream flujoSalida = new FileOutputStream(temp);
-            //Preparamos el temp para que se llene de la informacion de PDF dentro del jar
-            FileWriter fw = new FileWriter(temp);
-            //Creamos un arreglo de bytes generico que soporte un gran tamano 1KB * 512 B --> se usa para todo tipo de archivo  
-            byte[] buffer = new byte[1024*512];
- 
-            int control; //para contar posiciones de byte
- 
-            //Mientras haya bytes por leer se ejecuta este bucle
-            while ((control = flujoEntrada.read(buffer)) != -1){
-                flujoSalida.write(buffer, 0, control);
-            }
- 
-            //Cerramos y guardamos el archivo creado
-            fw.close();
-            flujoSalida.close();
-            flujoEntrada.close();
- */
+}

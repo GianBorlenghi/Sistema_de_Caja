@@ -9,6 +9,7 @@ import Impresion.Imprimir;
 import Modelos.Producto;
 import Servicios.ServicioProducto;
 import Servicios.ServicioVenta;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.paint.Color;
 import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
@@ -115,6 +117,14 @@ public class Principal extends javax.swing.JFrame {
         btnImprimir.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         btnImprimir.setForeground(new java.awt.Color(0, 0, 0));
         btnImprimir.setText("IMPRIMIR TICKET");
+        btnImprimir.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnImprimirMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnImprimirMouseExited(evt);
+            }
+        });
         btnImprimir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnImprimirActionPerformed(evt);
@@ -123,19 +133,19 @@ public class Principal extends javax.swing.JFrame {
 
         printPanel.setBackground(new java.awt.Color(204, 204, 204));
 
-        tablaCompra.setBackground(new java.awt.Color(204, 204, 204));
-        tablaCompra.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        tablaCompra.setBackground(new java.awt.Color(150, 150, 150));
+        tablaCompra.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         tablaCompra.setForeground(new java.awt.Color(0, 0, 0));
         tablaCompra.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "NOMBRE", "PRECIO", "CANTIDAD"
+                "NOMBRE", "MARCA", "PRECIO", "CANTIDAD"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -153,8 +163,12 @@ public class Principal extends javax.swing.JFrame {
         jScrollPane2.setViewportView(tablaCompra);
         if (tablaCompra.getColumnModel().getColumnCount() > 0) {
             tablaCompra.getColumnModel().getColumn(0).setResizable(false);
+            tablaCompra.getColumnModel().getColumn(0).setPreferredWidth(150);
             tablaCompra.getColumnModel().getColumn(1).setResizable(false);
             tablaCompra.getColumnModel().getColumn(2).setResizable(false);
+            tablaCompra.getColumnModel().getColumn(2).setPreferredWidth(5);
+            tablaCompra.getColumnModel().getColumn(3).setResizable(false);
+            tablaCompra.getColumnModel().getColumn(3).setPreferredWidth(2);
         }
 
         txtTotal.setBackground(new java.awt.Color(51, 51, 51));
@@ -452,7 +466,9 @@ public class Principal extends javax.swing.JFrame {
             try {
                 int nTicker = serV.guardarVenta(compra, this.total, pago);
                 Imprimir im = new Imprimir();
-                im.imprimimos(compra, this.total, nTicker,descuento);
+                ByteArrayOutputStream documentoBytes = im.crearTicketVenta(compra, total, nTicker, descuento,pago);
+                im.imprimir(documentoBytes);
+                
                 btnImprimir.setEnabled(false);
                 tablaCompra.setEnabled(false);
                 comboPago.setEnabled(false);
@@ -506,8 +522,8 @@ public class Principal extends javax.swing.JFrame {
         if (key == 127 && compra.size() > 0) {
 
             DefaultTableModel model = (DefaultTableModel) tablaCompra.getModel();
-            String precio = String.valueOf(tablaCompra.getValueAt(fila, 1));
-            String cant = String.valueOf(tablaCompra.getValueAt(fila, 2));
+            String precio = String.valueOf(tablaCompra.getValueAt(fila, 2));
+            String cant = String.valueOf(tablaCompra.getValueAt(fila, 3));
 
             model.removeRow(fila);
             compra.remove(fila);
@@ -531,7 +547,9 @@ public class Principal extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Aun no hay ventas");
             } else {
                 try {
-                    im.imprimirCierreCaja(total_del_dia);
+                    ByteArrayOutputStream bytes = im.imprimirCierreCaja(total_del_dia);
+                    im.imprimir(bytes);
+                    
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(this, ex.toString());
                 }
@@ -550,22 +568,26 @@ public class Principal extends javax.swing.JFrame {
     private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
 
         DefaultTableModel model = (DefaultTableModel) tablaCompra.getModel();
+        tablaCompra.setRowHeight(35);
+       
+        
         String seleccion = comboProducto.getSelectedItem().toString();
         String[] arrayString = seleccion.split(" ");
         int id = Integer.parseInt(arrayString[0].trim());
         int cant = (int) txtCantidad.getValue();
-        Object[] objec = new Object[3];
+        Object[] objec = new Object[4];
 
         for (Producto prod : listaProd) {
             if (prod.getId_producto() == id) {
 
                 if (!compra.contains(prod)) {
                     prod.setCant(cant);
-                   
+                    
                     compra.add(prod);
                     objec[0] = prod.getNombre_producto();
-                    objec[1] = prod.getPrecio();
-                    objec[2] = cant;
+                    objec[1] = prod.getMarca_nombre();
+                    objec[2] = prod.getPrecio();
+                    objec[3] = cant;
                     model.addRow(objec);
                     formatoDecimal.format(prod.getPrecio());
                     this.total += prod.getPrecio() * cant;
@@ -576,7 +598,7 @@ public class Principal extends javax.swing.JFrame {
                     break;
                 } else {
 
-                    int q = (int) model.getValueAt(compra.indexOf(prod), 2);
+                    int q = (int) model.getValueAt(compra.indexOf(prod), 3);
                     q += cant;
                     prod.setCant(q);
                     formatoDecimal.format(prod.getPrecio());
@@ -584,7 +606,7 @@ public class Principal extends javax.swing.JFrame {
                     String p = formatoDecimal.format(this.total);
                     txtTotal.setText("$ " + p);
                     txtCantidad.setValue(1);
-                    model.setValueAt(q, compra.indexOf(prod), 2);
+                    model.setValueAt(q, compra.indexOf(prod), 3);
 
                 }
             }
@@ -627,6 +649,22 @@ public class Principal extends javax.swing.JFrame {
         }
 
     }//GEN-LAST:event_menuJubiladoActionPerformed
+
+    private void btnImprimirMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnImprimirMouseEntered
+
+        if(btnImprimir.isEnabled()){
+        btnImprimir.setBackground(new java.awt.Color(120, 201, 125));
+        //[3,201,136]
+        }
+    }//GEN-LAST:event_btnImprimirMouseEntered
+
+    private void btnImprimirMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnImprimirMouseExited
+        if(btnImprimir.isEnabled()){
+        btnImprimir.setBackground(new java.awt.Color(3, 201, 136));
+   
+        }
+        
+            }//GEN-LAST:event_btnImprimirMouseExited
 
     /**
      * @param args the command line arguments
