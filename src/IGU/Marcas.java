@@ -315,7 +315,8 @@ public class Marcas extends javax.swing.JFrame {
             servM.editarMarca(this.idSeleccionEdit, txtModificado);
             model.setRowCount(0);
             llenarTablaMuestra();
-            JOptionPane.showMessageDialog(this, "Registro editado.");
+            txtModificar.setText("");
+            JOptionPane.showMessageDialog(this, "Registro modificado.");
  
         }
 
@@ -329,6 +330,7 @@ public class Marcas extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) tablaMarcas.getModel();
             model.setRowCount(0);
             llenarTablaMuestra();
+            txtMarca.setText("");
             JOptionPane.showMessageDialog(this, "Marca agregada correctamente");
         } else {
             JOptionPane.showMessageDialog(this, "Marca ya existente.");

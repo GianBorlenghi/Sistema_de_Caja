@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -42,6 +43,8 @@ public class Imprimir {
 
     public ByteArrayOutputStream crearTicketVenta(ArrayList<Producto> listaCompra, float total, int ticket, String descuento, String pago) throws IOException {
         ByteArrayOutputStream docBytes = new ByteArrayOutputStream();
+        DecimalFormat formatoDecimal = new DecimalFormat("#.00");
+     
 
         try {
             Rectangle pageSize = new Rectangle(360f, 14400f);
@@ -151,7 +154,7 @@ public class Imprimir {
                 col1.getFont().setSize(8);
                 Paragraph col2 = new Paragraph("" + p.getCant());
                 col2.getFont().setSize(8);
-                Paragraph col3 = new Paragraph("$" + p.getPrecio());
+                Paragraph col3 = new Paragraph("$" +formatoDecimal.format(p.getPrecio()));
                 col3.getFont().setSize(8);
                 table.addCell(col1);
                 table.addCell(col2);
@@ -176,7 +179,7 @@ public class Imprimir {
             celdaMetodoPago.setPaddingBottom(5);
             table.addCell(celdaMetodoPago);
 
-            Paragraph pfinal = new Paragraph("TOTAL                                                     $" + total);
+            Paragraph pfinal = new Paragraph("TOTAL                                                     $" +    formatoDecimal.format(total));
             pfinal.getFont().setSize(8);
             PdfPCell celdaFinal = new PdfPCell(pfinal);
             celdaFinal.setBorderColor(Color.RED);

@@ -466,7 +466,7 @@ public class Principal extends javax.swing.JFrame {
             try {
                 int nTicker = serV.guardarVenta(compra, this.total, pago);
                 Imprimir im = new Imprimir();
-                ByteArrayOutputStream documentoBytes = im.crearTicketVenta(compra, total, nTicker, descuento,pago);
+                ByteArrayOutputStream documentoBytes = im.crearTicketVenta(compra, total, nTicker, descuento, pago);
                 im.imprimir(documentoBytes);
                 
                 btnImprimir.setEnabled(false);
