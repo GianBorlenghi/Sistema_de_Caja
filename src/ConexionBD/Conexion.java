@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
 public class Conexion {
-    private final String url = "jdbc:mysql://sql10.freesqldatabase.com/sql10595245";//"jdbc:mysql://localhost/project";
-    private final String user = "sql10595245";//"root";
-    private final String password = "GKIZUSJfI1";//"";
+    private final String url = "jdbc:mysql://localhost/project";
+    private final String user = "root";
+    private final String password = "";
 
     public Connection conect(){
         Connection con = null;

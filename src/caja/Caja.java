@@ -6,6 +6,7 @@
 package caja;
 
 import IGU.Principal;
+import javax.swing.JFrame;
 
 /**
  *
@@ -18,6 +19,8 @@ public class Caja {
         Principal principal = new Principal();
         principal.setVisible(true);
         principal.setLocationRelativeTo(null);
+       principal.setExtendedState(JFrame.MAXIMIZED_BOTH);
+
     }
     
 }

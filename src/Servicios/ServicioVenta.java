@@ -16,6 +16,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ServicioVenta {
 
@@ -70,7 +72,7 @@ public class ServicioVenta {
             pst.clearBatch();
             for (Producto p : listaCompra) {
 
-                pst = con.prepareStatement("INSERT INTO venta_x_productos (id_ventaxpr,cantidad,id_producto,id_venta) VALUES (NULL, " + p.getCant() + " , " + p.getId_producto() + ", (SELECT MAX(id_venta) FROM ventas))");
+                pst = con.prepareStatement("INSERT INTO venta_x_productos (id_ventaxpr,cantidad,precio_total,id_producto,id_venta) VALUES (NULL, " + p.getCant() + " ," + p.getPrecio_al_publico() * p.getCant() + ", " + p.getId_producto() + ", (SELECT MAX(id_venta) FROM ventas))");
                 pst.executeUpdate();
             }
 
@@ -115,28 +117,39 @@ public class ServicioVenta {
         return listaVentas;
 
     }
-    
-    public ArrayList<Producto> detalleVenta(int id_venta){
-        ArrayList<Producto> listaProductoXCompra = new ArrayList<>();
-        try{
-            con = cone.conect();
-            pst = con.prepareStatement("SELECT nombre_producto,cantidad,precio from venta_x_productos inner join productos on productos.id_producto = venta_x_productos.id_producto where id_venta = "+id_venta);
-            rs = pst.executeQuery();
-            
-            while(rs.next()){
 
-            Producto p = new Producto();
-            p.setNombre_producto(rs.getString("nombre_producto"));
-            p.setCant(rs.getInt("cantidad"));
-            p.setPrecio(rs.getFloat("precio"));
-            listaProductoXCompra.add(p);
-          
-                
+    public ArrayList<Producto> detalleVenta(int id_venta) {
+        ArrayList<Producto> listaProductoXCompra = new ArrayList<>();
+        try {
+            con = cone.conect();
+            pst = con.prepareStatement("SELECT nombre_producto,cantidad,precio from venta_x_productos inner join productos on productos.id_producto = venta_x_productos.id_producto where id_venta = " + id_venta);
+            rs = pst.executeQuery();
+
+            while (rs.next()) {
+
+                Producto p = new Producto();
+                p.setNombre_producto(rs.getString("nombre_producto"));
+                p.setCant(rs.getInt("cantidad"));
+                p.setPrecio(rs.getFloat("precio"));
+                listaProductoXCompra.add(p);
+
             }
-        }catch(SQLException e){
-            
+        } catch (SQLException e) {
+
         }
-        
+
         return listaProductoXCompra;
+    }
+
+    public String ventaTotal() {
+        try {
+            con = cone.conect();
+            pst = con.prepareStatement("SELECT FORMAT(sum(total),2) as total FROM ventas");
+            rs = pst.executeQuery();
+            if(rs.next()) return rs.getString("total");
+        } catch (SQLException ex) {
+            Logger.getLogger(ServicioVenta.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 }

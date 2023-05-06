@@ -1,5 +1,7 @@
 package Modelos;
 
+import java.util.Date;
+
 
 public class Producto {
     
@@ -8,22 +10,71 @@ public class Producto {
      private int marca_producto;
      private int tipo_producto;
      private float precio;
+     private float mark_up;
+     private float precio_con_iva;
+     private float precio_al_publico;
      private String marca_nombre;
      private String tipo_nombre;
      private int cant;
+     private float totalXFactura;
+     private String url_imagen;
+     private int stock;
+     private String fecha_factura;
 
     public Producto() {
     }
 
-    public Producto(int cant,int id_producto,float precio,String nombre_producto, int marca_producto, int tipo_producto) {
+    public Producto(int id_producto,String fecha_factura, int stock, String nombre_producto, int marca_producto, int tipo_producto, float precio, float mark_up, float precio_con_iva, float precio_al_publico, String marca_nombre, String tipo_nombre, int cant, float totalXFactura, String url_imagen) {
+        this.id_producto = id_producto;
         this.nombre_producto = nombre_producto;
         this.marca_producto = marca_producto;
         this.tipo_producto = tipo_producto;
         this.precio = precio;
-        this.id_producto = id_producto;
+        this.mark_up = mark_up;
+        this.precio_con_iva = precio_con_iva;
+        this.precio_al_publico = precio_al_publico;
+        this.marca_nombre = marca_nombre;
+        this.tipo_nombre = tipo_nombre;
         this.cant = cant;
+        this.totalXFactura = totalXFactura;
+        this.url_imagen = url_imagen;
+        this.stock = stock;
+        this.fecha_factura = fecha_factura;
     }
 
+    public String getUrl_imagen() {
+        return url_imagen;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public void setUrl_imagen(String url_imagen) {
+        this.url_imagen = url_imagen;
+    }
+
+  
+    public float getTotalXFactura() {
+        return totalXFactura;
+    }
+
+    public void setTotalXFactura(float totalXFactura) {
+        this.totalXFactura = totalXFactura;
+    }
+
+    
+    public int getId_producto() {
+        return id_producto;
+    }
+
+    public void setId_producto(int id_producto) {
+        this.id_producto = id_producto;
+    }
 
     public String getNombre_producto() {
         return nombre_producto;
@@ -57,12 +108,28 @@ public class Producto {
         this.precio = precio;
     }
 
-    public int getId_producto() {
-        return id_producto;
+    public float getMark_up() {
+        return mark_up;
     }
 
-    public void setId_producto(int id_producto) {
-        this.id_producto = id_producto;
+    public void setMark_up(float mark_up) {
+        this.mark_up = mark_up;
+    }
+
+    public float getPrecio_con_iva() {
+        return precio_con_iva;
+    }
+
+    public void setPrecio_con_iva(float precio_con_iva) {
+        this.precio_con_iva = precio_con_iva;
+    }
+
+    public float getPrecio_al_publico() {
+        return precio_al_publico;
+    }
+
+    public void setPrecio_al_publico(float precio_al_publico) {
+        this.precio_al_publico = precio_al_publico;
     }
 
     public String getMarca_nombre() {
@@ -88,8 +155,19 @@ public class Producto {
     public void setCant(int cant) {
         this.cant = cant;
     }
-     
-     
+
+    public String getFecha_factura() {
+        return fecha_factura;
+    }
+
+    public void setFecha_factura(String fecha_factura) {
+        this.fecha_factura = fecha_factura;
+    }
     
     
+
+    
+
+
+   
 }
