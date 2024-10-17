@@ -128,6 +128,7 @@ public class Principal extends javax.swing.JFrame {
         txtMarca.setText("");
         barCode.setText("");
         barCode.requestFocus();
+        check.setVisible(false);
         txtCantidad.setVisible(false);
         lblCantidad.setVisible(false);
         /*Toolkit tk = Toolkit.getDefaultToolkit();
@@ -843,7 +844,7 @@ public class Principal extends javax.swing.JFrame {
         Object[] objec = new Object[4];
         DefaultTableModel model = (DefaultTableModel) tablaCompra.getModel();
         tablaCompra.setRowHeight(35);
-        if (check.isSelected()) {
+        /*if (check.isSelected()) {
             String seleccion = comboProducto.getSelectedItem().toString();
             String[] arrayString = seleccion.split("-");
             id = Integer.parseInt(arrayString[1].trim());
@@ -973,145 +974,145 @@ public class Principal extends javax.swing.JFrame {
                 }
 
             }
-        } else {
-            for (Producto prod : productoConPrecioDistACero) {
-                id = prod.getId_producto();
-                if (prod.getCodigo_barra().equals(barCode.getText())) {
+        } else {*/
+        for (Producto prod : productoConPrecioDistACero) {
+            id = prod.getId_producto();
+            if (prod.getCodigo_barra().equals(barCode.getText())) {
 
-                    if (!compra.contains(prod)) {
-                        if (cant <= prod.getStock()) {
-                            prod.setCant(cant);
-                            compra.add(prod);
-                            pr = servPro.promocionXProd(id);
+                if (!compra.contains(prod)) {
+                    if (cant <= prod.getStock()) {
+                        prod.setCant(cant);
+                        compra.add(prod);
+                        pr = servPro.promocionXProd(id);
 
-                            if (pr == null || (cant % pr.getCantidad_minima() != 0)) {
-                                /* objec[0] = prod.getNombre_producto();
+                        if (pr == null || (cant % pr.getCantidad_minima() != 0)) {
+                            /* objec[0] = prod.getNombre_producto();
                                 objec[1] = prod.getMarca_nombre();
                                 objec[2] = prod.getPrecio_al_publico();
                                 objec[3] = cant;*/
-                                crearFilaProducto(prod, cant, model);
-                                // model.addRow(objec);
-                                formatoDecimal.format(prod.getPrecio_al_publico());
-                                this.subtotal += prod.getPrecio_al_publico() * cant;
-                                String p = formatoDecimal.format(this.subtotal);
-                                txtSubtotal.setText("$ " + p);
-                                this.total += prod.getPrecio_al_publico();
-                                String t = formatoDecimal.format(this.total);
-                                txtTot.setText("$ " + t);
-                                txtCantidad.setValue(1);
-                                break;
-                            } else if (pr != null && (cant % pr.getCantidad_minima() == 0)) {
-                                /*objec[0] = prod.getNombre_producto();
+                            crearFilaProducto(prod, cant, model);
+                            // model.addRow(objec);
+                            formatoDecimal.format(prod.getPrecio_al_publico());
+                            this.subtotal += prod.getPrecio_al_publico() * cant;
+                            String p = formatoDecimal.format(this.subtotal);
+                            txtSubtotal.setText("$ " + p);
+                            this.total += prod.getPrecio_al_publico();
+                            String t = formatoDecimal.format(this.total);
+                            txtTot.setText("$ " + t);
+                            txtCantidad.setValue(1);
+                            break;
+                        } else if (pr != null && (cant % pr.getCantidad_minima() == 0)) {
+                            /*objec[0] = prod.getNombre_producto();
                                 objec[1] = prod.getMarca_nombre();
                                 objec[2] = prod.getPrecio_al_publico();
                                 objec[3] = cant;
                                 model.addRow(objec);*/
-                                crearFilaProducto(prod, cant, model);
+                            crearFilaProducto(prod, cant, model);
 
-                                objec[0] = prod.getCodigo_barra();
-                                objec[1] = "-" + pr.getDescuento() + "% ";
-                                objec[2] = pr.getNombre_promocion();
-                                objec[3] = "";
-
-                                model.addRow(objec);
-                                compra.add(null);
-
-                                formatoDecimal.format(prod.getPrecio_al_publico());
-                                this.subtotal += prod.getPrecio_al_publico() * cant;
-                                this.total += ((prod.getPrecio_al_publico() - (prod.getPrecio_al_publico() * pr.getDescuento() / 100))) * cant;
-                                System.out.println(total);
-                                String p = formatoDecimal.format(this.subtotal);
-                                String t = formatoDecimal.format(this.total);
-                                txtSubtotal.setText("$ " + p);
-                                txtTot.setText("$ " + t);
-                                txtCantidad.setValue(1);
-
-                                break;
-                            }
-
-                        } else {
-                            JOptionPane.showMessageDialog(this, "Solo hay " + prod.getStock() + " del producto " + prod.getNombre_producto() + " en stock!");
-                            break;
-                        }
-                    } else {
-                        int q = (int) model.getValueAt(compra.indexOf(prod), 3);
-                        q += cant;
-                        pr = servPro.promocionXProd(id);
-
-                        if (q <= prod.getStock() && pr != null && (q % pr.getCantidad_minima() != 0)) {
-                            prod.setCant(q);
-                            formatoDecimal.format(prod.getPrecio_al_publico());
-                            this.subtotal += prod.getPrecio_al_publico() * cant;
-                            String p = formatoDecimal.format(this.subtotal);
-                            txtSubtotal.setText("$ " + p);
-                            txtCantidad.setValue(1);
-                            this.total += prod.getPrecio_al_publico();
-                            String t = formatoDecimal.format(this.total);
-                            txtTot.setText("$ " + t);
-                            model.setValueAt(q, compra.indexOf(prod), 3);
-                        } //agregado
-                        else if (q <= prod.getStock() && pr != null && (q % pr.getCantidad_minima() == 0)) {
                             objec[0] = prod.getCodigo_barra();
                             objec[1] = "-" + pr.getDescuento() + "% ";
                             objec[2] = pr.getNombre_promocion();
                             objec[3] = "";
+
                             model.addRow(objec);
                             compra.add(null);
 
-                            prod.setCant(q);
                             formatoDecimal.format(prod.getPrecio_al_publico());
                             this.subtotal += prod.getPrecio_al_publico() * cant;
+                            this.total += ((prod.getPrecio_al_publico() - (prod.getPrecio_al_publico() * pr.getDescuento() / 100))) * cant;
+                            System.out.println(total);
                             String p = formatoDecimal.format(this.subtotal);
-                            txtSubtotal.setText("$ " + p);
-
-                            if (cant == pr.getCantidad_minima()) {
-                                this.total += prod.getPrecio_al_publico() * cant;
-                                this.total -= (prod.getPrecio_al_publico() * pr.getDescuento() / 100) * pr.getCantidad_minima();
-                            } else {
-                                this.total += prod.getPrecio_al_publico();
-                                this.total -= (prod.getPrecio_al_publico() * pr.getDescuento() / 100) * pr.getCantidad_minima();
-                            }
-
                             String t = formatoDecimal.format(this.total);
-                            txtTot.setText("$ " + t);
-                            model.setValueAt(q, compra.indexOf(prod), 3);
-                        } else if (pr == null) {
-                            prod.setCant(q);
-                            formatoDecimal.format(prod.getPrecio_al_publico());
-                            this.subtotal += prod.getPrecio_al_publico() * cant;
-                            String p = formatoDecimal.format(this.subtotal);
                             txtSubtotal.setText("$ " + p);
+                            txtTot.setText("$ " + t);
                             txtCantidad.setValue(1);
-                            this.total += prod.getPrecio_al_publico();
-                            String t = formatoDecimal.format(this.total);
-                            txtTot.setText("$ " + t);
-                            model.setValueAt(q, compra.indexOf(prod), 3);
-                        } else {
-                            JOptionPane.showMessageDialog(this, "Solo hay " + prod.getStock() + " del producto " + prod.getNombre_producto() + " en stock!");
+
+                            break;
                         }
 
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Solo hay " + prod.getStock() + " del producto " + prod.getNombre_producto() + " en stock!");
+                        break;
                     }
-                } else if (barCode.getText().startsWith(balanzaConfig.getPrefijo())) {
-                    String codigoProducto = balanzaConfig.extraerCodigoProducto(barCode.getText());  // Extrae el código del producto
-                    float peso = balanzaConfig.extraerPeso(barCode.getText());  // Extrae el peso en kilogramos
-                    if (prod.getId_producto() == Integer.parseInt(codigoProducto)) {
-                        prod.setCant(peso);
-                        System.out.println(barCode.getText());
-                        crearFilaProducto(prod, cant, model);
-                        System.out.println(prod.getPrecio_al_publico());
-                        compra.add(prod);
-                        // model.addRow(objec);
+                } else {
+                    //int q = (int) model.getValueAt(compra.indexOf(prod), 3);
+                    Number valor2 = (Number) model.getValueAt(compra.indexOf(prod), 3);
+                    float q = valor2.floatValue();
+                    q += cant;
+                    pr = servPro.promocionXProd(id);
+
+                    if (q <= prod.getStock() && pr != null && (q % pr.getCantidad_minima() != 0)) {
+                        prod.setCant(q);
                         formatoDecimal.format(prod.getPrecio_al_publico());
-                        this.subtotal += prod.getPrecio_al_publico() * peso;
+                        this.subtotal += prod.getPrecio_al_publico() * cant;
                         String p = formatoDecimal.format(this.subtotal);
                         txtSubtotal.setText("$ " + p);
-                        this.total += prod.getPrecio_al_publico()*peso;
+                        txtCantidad.setValue(1);
+                        this.total += prod.getPrecio_al_publico();
                         String t = formatoDecimal.format(this.total);
                         txtTot.setText("$ " + t);
-                        txtCantidad.setValue(1);
-                    }
-                }
+                        model.setValueAt(q, compra.indexOf(prod), 3);
+                    } //agregado
+                    else if (q <= prod.getStock() && pr != null && (q % pr.getCantidad_minima() == 0)) {
+                        objec[0] = prod.getCodigo_barra();
+                        objec[1] = "-" + pr.getDescuento() + "% ";
+                        objec[2] = pr.getNombre_promocion();
+                        objec[3] = "";
+                        model.addRow(objec);
+                        compra.add(null);
 
+                        prod.setCant(q);
+                        formatoDecimal.format(prod.getPrecio_al_publico());
+                        this.subtotal += prod.getPrecio_al_publico() * cant;
+                        String p = formatoDecimal.format(this.subtotal);
+                        txtSubtotal.setText("$ " + p);
+
+                        if (cant == pr.getCantidad_minima()) {
+                            this.total += prod.getPrecio_al_publico() * cant;
+                            this.total -= (prod.getPrecio_al_publico() * pr.getDescuento() / 100) * pr.getCantidad_minima();
+                        } else {
+                            this.total += prod.getPrecio_al_publico();
+                            this.total -= (prod.getPrecio_al_publico() * pr.getDescuento() / 100) * pr.getCantidad_minima();
+                        }
+
+                        String t = formatoDecimal.format(this.total);
+                        txtTot.setText("$ " + t);
+                        model.setValueAt(q, compra.indexOf(prod), 3);
+                    } else if (pr == null) {
+                        prod.setCant(q);
+                        formatoDecimal.format(prod.getPrecio_al_publico());
+                        this.subtotal += prod.getPrecio_al_publico() * cant;
+                        String p = formatoDecimal.format(this.subtotal);
+                        txtSubtotal.setText("$ " + p);
+                        txtCantidad.setValue(1);
+                        this.total += prod.getPrecio_al_publico();
+                        String t = formatoDecimal.format(this.total);
+                        txtTot.setText("$ " + t);
+                        model.setValueAt(q, compra.indexOf(prod), 3);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Solo hay " + prod.getStock() + " del producto " + prod.getNombre_producto() + " en stock!");
+                    }
+
+                }
+            } else if (barCode.getText().startsWith(balanzaConfig.getPrefijo())) {
+                String codigoProducto = balanzaConfig.extraerCodigoProducto(barCode.getText());  // Extrae el código del producto
+                float peso = balanzaConfig.extraerPeso(barCode.getText());  // Extrae el peso en kilogramos
+                if (prod.getId_producto() == Integer.parseInt(codigoProducto)) {
+                    prod.setCant(peso);
+                    System.out.println(barCode.getText());
+                    crearFilaProducto(prod, cant, model);
+                    System.out.println(prod.getPrecio_al_publico());
+                    compra.add(prod);
+                    // model.addRow(objec);
+                    formatoDecimal.format(prod.getPrecio_al_publico());
+                    this.subtotal += prod.getPrecio_al_publico() * peso;
+                    String p = formatoDecimal.format(this.subtotal);
+                    txtSubtotal.setText("$ " + p);
+                    this.total += prod.getPrecio_al_publico() * peso;
+                    String t = formatoDecimal.format(this.total);
+                    txtTot.setText("$ " + t);
+                    txtCantidad.setValue(1);
+                }
             }
 
         }
